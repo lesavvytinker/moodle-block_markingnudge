@@ -1,0 +1,48 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_markingnudge/totals
+
+    What's waiting across the assessor's courses, and a button to the marking page.
+
+    Example context (json):
+    {
+        "hasitems": true,
+        "items": [{"count": 5, "label": "to mark", "key": "tomark"}, {"count": 1, "label": "need feedback", "key": "feedback"}],
+        "hasoverdue": true,
+        "overdue": [{"count": 1, "level": "red", "label": "waiting 14+ days"}, {"count": 1, "level": "amber", "label": "waiting 7+ days"}],
+        "url": "https://example.com/report/evidencereporter/marking.php"
+    }
+}}
+<div class="block-markingnudge">
+    {{#hasitems}}
+    <ul class="list-unstyled mb-2">
+        {{#items}}
+        <li class="bmn-item bmn-{{key}}"><span class="bmn-count">{{count}}</span> {{label}}</li>
+        {{/items}}
+    </ul>
+    {{/hasitems}}
+    {{#hasoverdue}}
+    <p class="mb-2">
+        {{#overdue}}<span class="badge bmn-{{level}} me-1">{{count}} {{label}}</span>{{/overdue}}
+    </p>
+    {{/hasoverdue}}
+    {{^hasitems}}
+    <p class="text-muted mb-2">{{#str}} caughtup, block_markingnudge {{/str}}</p>
+    {{/hasitems}}
+    <a href="{{url}}" class="btn btn-primary btn-sm">{{#str}} gotomarking, block_markingnudge {{/str}}</a>
+</div>

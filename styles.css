@@ -1,0 +1,19 @@
+.block-markingnudge .bmn-count {
+    font-weight: 700;
+    font-size: 1.15rem;
+    margin-right: .25rem;
+}
+
+.block-markingnudge .bmn-feedback {
+    color: #a1281f;
+}
+
+.block-markingnudge .badge.bmn-red {
+    background-color: #a1281f;
+    color: #fff;
+}
+
+.block-markingnudge .badge.bmn-amber {
+    background-color: #f0b429;
+    color: #212529;
+}
