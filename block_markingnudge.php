@@ -23,7 +23,8 @@
  */
 
 /**
- * Marking nudge: what's waiting across the assessor's courses, with a button to the marking page. It does no work of
+ * Marking nudge: what's waiting to be marked (on the Dashboard: across the assessor's courses; on a course page: in
+ * that course; on a category page: in its courses), with a button to the marking page. It does no work of
  * its own: the numbers come from Evidence Reporter's marking page.
  *
  * @package    block_markingnudge
@@ -39,16 +40,17 @@ class block_markingnudge extends block_base {
     }
 
     /**
-     * Only on the Dashboard.
+     * On the Dashboard (all the assessor's courses), a course page (that course) or a course category page (the courses
+     * in it).
      *
      * @return array
      */
     public function applicable_formats() {
-        return ['my' => true, 'all' => false];
+        return ['my' => true, 'course-view' => true, 'course-index-category' => true, 'all' => false];
     }
 
     /**
-     * One per Dashboard.
+     * One per page.
      *
      * @return bool
      */
@@ -79,30 +81,59 @@ class block_markingnudge extends block_base {
         if (!isloggedin() || isguestuser() || !class_exists('\report_evidencereporter\local\marking')) {
             return $this->content;
         }
-        $totals = self::get_totals();
+        [$scope, $id] = $this->page ? self::get_scope($this->page) : ['my', 0];
+        $totals = self::get_totals($scope, $id);
         if ($totals === null) {
             return $this->content;
         }
-        $this->content->text = $OUTPUT->render_from_template('block_markingnudge/totals', self::export($totals));
+        $this->content->text = $OUTPUT->render_from_template('block_markingnudge/totals', self::export($totals, $scope, $id));
         return $this->content;
     }
 
     /**
-     * The current user's totals across their courses (cached for a few minutes), or null if they mark nowhere.
+     * What the block on this page counts: a course, a category, or (on the Dashboard) all the user's courses.
      *
-     * @return stdClass|null tomark, amber, red, feedback, notreleased, toconfirm, ready, torecord (RA and LLN to record;
-     *                       Evidence Reporter 0.29.0 and later)
+     * @param moodle_page $page
+     * @return array [scope ('course', 'category' or 'my'), id]
      */
-    public static function get_totals(): ?stdClass {
+    public static function get_scope(moodle_page $page): array {
+        if ($page->context->contextlevel == CONTEXT_COURSECAT) {
+            return ['category', (int) $page->context->instanceid];
+        }
+        if (
+            !empty($page->course->id) && (int) $page->course->id !== (int) SITEID
+                && strpos($page->pagetype, 'my-') !== 0
+        ) {
+            return ['course', (int) $page->course->id];
+        }
+        return ['my', 0];
+    }
+
+    /**
+     * The current user's totals (cached for a few minutes), or null if they don't mark there.
+     *
+     * @param string $scope 'my' (all their courses), 'course' or 'category'
+     * @param int $id The course or category
+     * @return stdClass|null tomark, amber, red, feedback, notreleased, toconfirm, ready, torecord
+     */
+    public static function get_totals(string $scope = 'my', int $id = 0): ?stdClass {
         global $USER;
         $cache = cache::make('block_markingnudge', 'totals');
-        $key = 'u' . $USER->id;
+        $key = 'u' . $USER->id . '_' . $scope . $id;
         $cached = $cache->get($key);
         if ($cached !== false) {
             return $cached ?: null;
         }
-        $overview = \report_evidencereporter\local\marking::get_overview();
-        $totals = count($overview) > 1 ? $overview[0]->counts : null;
+        $totals = null;
+        if ($scope === 'course') {
+            $context = context_course::instance($id, IGNORE_MISSING);
+            if ($context && has_capability('report/evidencereporter:marking', $context)) {
+                $totals = \report_evidencereporter\local\marking::build($id)->counts;
+            }
+        } else {
+            $overview = \report_evidencereporter\local\marking::get_overview($scope === 'category' ? $id : 0);
+            $totals = count($overview) > 1 ? $overview[0]->counts : null;
+        }
         $cache->set($key, $totals ?? 0);
         return $totals;
     }
@@ -111,9 +142,11 @@ class block_markingnudge extends block_base {
      * Template data.
      *
      * @param stdClass $totals
+     * @param string $scope See {@see get_totals()}
+     * @param int $id
      * @return array
      */
-    public static function export(stdClass $totals): array {
+    public static function export(stdClass $totals, string $scope = 'my', int $id = 0): array {
         [$amber, $red] = \report_evidencereporter\local\marking::get_thresholds();
         $items = [];
         foreach (['tomark', 'feedback', 'notreleased', 'torecord', 'toconfirm', 'ready'] as $key) {
@@ -136,7 +169,8 @@ class block_markingnudge extends block_base {
             'hasitems' => (bool) $items,
             'overdue' => $overdue,
             'hasoverdue' => (bool) $overdue,
-            'url' => (new moodle_url('/report/evidencereporter/marking.php'))->out(false),
+            'url' => (new moodle_url('/report/evidencereporter/marking.php', $scope === 'course' ? ['courseid' => $id]
+                : ($scope === 'category' ? ['categoryid' => $id] : [])))->out(false),
         ];
     }
 }

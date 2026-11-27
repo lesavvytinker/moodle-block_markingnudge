@@ -25,11 +25,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_markingnudge';
-$plugin->version   = 2026112700;
+$plugin->version   = 2026112800;
 $plugin->requires  = 2024100700; // Moodle 4.5.
 $plugin->supported = [405, 502];
 $plugin->maturity  = MATURITY_ALPHA;
-$plugin->release   = '0.2.0';
+$plugin->release   = '0.3.0';
 $plugin->dependencies = [
-    'report_evidencereporter' => 2026120900, // Evidence Reporter 0.29.0: RA and LLN to record.
+    'report_evidencereporter' => 2026121500, // Evidence Reporter 0.35.0: totals for a category.
 ];

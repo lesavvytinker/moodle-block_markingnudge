@@ -25,12 +25,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['addinstance'] = 'Add a Marking nudge block';
-$string['cachedef_totals'] = 'Marking totals per user';
+$string['cachedef_totals'] = 'Marking totals per user and page';
 $string['caughtup'] = 'All caught up.';
 $string['count_feedback'] = 'need feedback';
 $string['count_notreleased'] = 'marked, not released';
 $string['count_ready'] = 'ready to sign off';
-$string['count_toconfirm'] = 'adjustments to confirm';
+$string['count_toconfirm'] = 'Moodle overrides to check';
 $string['count_tomark'] = 'to mark';
 $string['count_torecord'] = 'RA/LLN to record';
 $string['count_waiting'] = 'waiting {$a}+ days';
