@@ -90,7 +90,8 @@ class block_markingnudge extends block_base {
     /**
      * The current user's totals across their courses (cached for a few minutes), or null if they mark nowhere.
      *
-     * @return stdClass|null tomark, amber, red, feedback, notreleased, toconfirm, ready
+     * @return stdClass|null tomark, amber, red, feedback, notreleased, toconfirm, ready, torecord (RA and LLN to record;
+     *                       Evidence Reporter 0.29.0 and later)
      */
     public static function get_totals(): ?stdClass {
         global $USER;
@@ -115,7 +116,7 @@ class block_markingnudge extends block_base {
     public static function export(stdClass $totals): array {
         [$amber, $red] = \report_evidencereporter\local\marking::get_thresholds();
         $items = [];
-        foreach (['tomark', 'feedback', 'notreleased', 'toconfirm', 'ready'] as $key) {
+        foreach (['tomark', 'feedback', 'notreleased', 'torecord', 'toconfirm', 'ready'] as $key) {
             if (!empty($totals->$key)) {
                 $items[] = ['count' => $totals->$key, 'label' => get_string('count_' . $key, 'block_markingnudge'),
                     'key' => $key];

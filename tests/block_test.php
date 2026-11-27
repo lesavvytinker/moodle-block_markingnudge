@@ -56,9 +56,18 @@ final class block_test extends \advanced_testcase {
         $learner = $gen->create_and_enrol($course, 'student');
 
         $this->setUser($teacher);
+        // RA and LLN not yet recorded for the learner.
         $data = \block_markingnudge::export(\block_markingnudge::get_totals());
-        $this->assertFalse($data['hasitems'], 'Nothing to mark yet: all caught up');
+        $this->assertSame(['torecord'], array_column($data['items'], 'key'));
+        $this->assertSame('RA/LLN to record', $data['items'][0]['label']);
         $this->assertStringEndsWith('/report/evidencereporter/marking.php', $data['url']);
+
+        // Recorded: all caught up.
+        \report_evidencereporter\local\declarations::save(get_fast_modinfo($course)->get_cm($assign->cmid), [
+            $learner->id => ['ra' => false, 'radetails' => '', 'lln' => false, 'llndetails' => '']]);
+        \cache::make('block_markingnudge', 'totals')->purge();
+        $data = \block_markingnudge::export(\block_markingnudge::get_totals());
+        $this->assertFalse($data['hasitems'], 'Nothing to do: all caught up');
 
         $DB->insert_record('assign_submission', ['assignment' => $assign->id, 'userid' => $learner->id,
             'status' => 'submitted', 'latest' => 1, 'attemptnumber' => 0, 'groupid' => 0,

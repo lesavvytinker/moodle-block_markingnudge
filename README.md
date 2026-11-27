@@ -4,7 +4,8 @@ A small Dashboard block for assessors: what's waiting across their courses, with
 marking page.
 
 - **Totals only:** to mark, waiting past the amber and red thresholds (7 and 14 days by default, set in Evidence
-  Reporter), need feedback, marked but not released, reasonable adjustments to confirm, units ready to sign off.
+  Reporter), need feedback, marked but not released, RA and LLN still to record, reasonable adjustments to confirm, units ready
+  to sign off.
 - **Go to marking** opens the marking page's *All my courses* view; each course opens its grid.
 - **All caught up** when there's nothing to do; nothing at all for users who don't mark anywhere.
 - The totals are cached for each user for up to five minutes.
